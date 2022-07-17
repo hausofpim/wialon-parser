@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { createClient, RedisClientType } from 'redis';
 
 @Injectable()
 export class StorageService {
   redisClient: RedisClientType;
-  constructor() {
+  constructor(private readonly configService: ConfigService) {
     this.createConnect();
   }
 
@@ -21,9 +22,13 @@ export class StorageService {
   }
 
   private async createConnect() {
+    const redisHost = this.configService.getOrThrow('REDIS_HOST');
+    const redisPort = this.configService.getOrThrow('REDIS_PORT');
+
     this.redisClient = createClient({
-      url: 'redis://default:redispw@localhost:49153',
+      url: `redis://${redisHost}:${redisPort}/`,
     });
+
     this.redisClient.on('error', (err) =>
       console.log('Redis Client Error', err),
     );

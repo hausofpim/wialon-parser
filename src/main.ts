@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { CustomHttpException } from './http-exceptions/custom-http.exception';
@@ -7,7 +8,7 @@ import { ParserService } from './parser/parser.service';
 const net = require('net');
 
 async function bootstrap() {
-  const paserService = await createStandaloneParserApp();
+  const { paserService, configService } = await createStandaloneParserApp();
 
   const tcpServer = net.createServer();
   tcpServer.on('connection', (connection) => {
@@ -52,18 +53,24 @@ async function bootstrap() {
     console.log('new client connection from %s', remoteAddress);
   });
 
-  tcpServer.listen(555, 'localhost', function () {
+  const tcpServerPort = configService.get('TCP_PORT');
+  const tcpServerHost = configService.get('TCP_HOST');
+  tcpServer.listen(tcpServerPort, tcpServerHost, function () {
     console.log('server listening to %j', tcpServer.address());
   });
 }
 
 async function createStandaloneParserApp() {
   const app = await NestFactory.createApplicationContext(AppModule);
-  const tasksService = app
+  const paserService = app
     .select(ParserModule)
     .get(ParserService, { strict: true });
 
-  return tasksService;
+  const configService = app
+    .select(ConfigModule)
+    .get(ConfigService, { strict: true });
+
+  return { paserService, configService };
 }
 
 bootstrap();
