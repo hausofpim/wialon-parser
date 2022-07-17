@@ -8,16 +8,6 @@ export class StorageService {
     this.createConnect();
   }
 
-  async createConnect() {
-    this.redisClient = createClient({
-      url: 'redis://default:redispw@localhost:49153',
-    });
-    this.redisClient.on('error', (err) =>
-      console.log('Redis Client Error', err),
-    );
-    await this.redisClient.connect();
-  }
-
   async set(key, value) {
     await this.redisClient.set(key, value);
   }
@@ -28,5 +18,15 @@ export class StorageService {
 
   async del(key) {
     await this.redisClient.del(key);
+  }
+
+  private async createConnect() {
+    this.redisClient = createClient({
+      url: 'redis://default:redispw@localhost:49153',
+    });
+    this.redisClient.on('error', (err) =>
+      console.log('Redis Client Error', err),
+    );
+    await this.redisClient.connect();
   }
 }
