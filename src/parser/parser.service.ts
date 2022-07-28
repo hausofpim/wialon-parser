@@ -32,19 +32,22 @@ export class ParserService {
         terminalRemoteAddress,
         parseResult.data.imei,
       );
-    } else {
-      const imei = await this.storageService.get(terminalRemoteAddress);
-      parseResult.data.imei = imei;
+      return parseResult;
+    }
 
-      let terminalId: Types.ObjectId;
-      if (imei) {
-        terminalId = await this.getTeminalId(imei);
-      }
+    const imei: string = await this.getImei(terminalRemoteAddress);
+    const terminalId: Types.ObjectId = await this.getTeminalId(imei);
 
-      await this.pointsModel.create({
-        terminalId,
-        ...parseResult.data,
-      });
+    if (
+      messageType === TerminalCodes.SHORT_DATA_PACKET_REQUEST ||
+      messageType === TerminalCodes.DATA_PACKET_REQUEST
+    ) {
+      await this.savePoint(parseResult.data, imei, terminalId);
+    } else if (messageType === TerminalCodes.BLACKBOX_PACKET_REQUEST) {
+      const pointsToSave = parseResult.data.map((el) =>
+        this.savePoint(el, imei, terminalId),
+      );
+      await Promise.all(pointsToSave);
     }
 
     return parseResult;
@@ -72,8 +75,20 @@ export class ParserService {
     };
   }
 
+  private async getImei(terminalRemoteAddress: string) {
+    return await this.storageService.get(terminalRemoteAddress);
+  }
+
   private async getTeminalId(imei: string) {
     const terminalId = await this.terminalsModel.findOne({ imei: imei }).exec();
     return terminalId ? terminalId._id : null;
+  }
+
+  private async savePoint(pointData, imei: string, terminalId: Types.ObjectId) {
+    return await this.pointsModel.create({
+      imei,
+      terminalId,
+      ...pointData,
+    });
   }
 }

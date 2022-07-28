@@ -26,6 +26,7 @@ async function bootstrap() {
         })
         .catch((error) => {
           if (error instanceof CustomHttpException) {
+            console.log(error, data);
             const errorData = error.getResponse();
             console.log(
               `CustomHttpException:: Parsing message error:`,
@@ -47,7 +48,7 @@ async function bootstrap() {
     });
 
     connection.on('error', (error) => {
-      console.log('connection error');
+      console.log('connection error', error);
     });
 
     console.log('new client connection from %s', remoteAddress);

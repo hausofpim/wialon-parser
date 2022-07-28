@@ -1,4 +1,4 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { SchemaTypes, Types, Document } from 'mongoose';
 
 export type PointsDocument = PointsModel & Document;
@@ -27,6 +27,18 @@ export class PointsModel {
   sats: string;
   @Prop()
   imei: string;
+  @Prop()
+  hdop?: string;
+  @Prop()
+  inputs?: number[];
+  @Prop()
+  outputs?: number[];
+  @Prop()
+  adc?: number[];
+  @Prop()
+  ibutton?: string;
+  @Prop(raw({}))
+  params?: Record<string, any>;
   @Prop({ type: SchemaTypes.ObjectId, ref: 'TerminalsModel' })
   terminalId: Types.ObjectId;
 }

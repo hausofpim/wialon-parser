@@ -4,5 +4,5 @@ export abstract class Message {
   abstract messageParams?: string;
 
   abstract parseMessage(messageParams?: string);
-  abstract generateMessageResponse();
+  abstract generateMessageResponse(responseParam?: string);
 }
