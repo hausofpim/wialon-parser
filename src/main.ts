@@ -8,7 +8,7 @@ import { ParserService } from './parser/parser.service';
 const net = require('net');
 
 async function bootstrap() {
-  const { paserService, configService } = await createStandaloneParserApp();
+  const { paserService, configService } = await createStandaloneServices();
 
   const tcpServer = net.createServer();
   tcpServer.on('connection', (connection) => {
@@ -60,7 +60,7 @@ async function bootstrap() {
   });
 }
 
-async function createStandaloneParserApp() {
+async function createStandaloneServices() {
   const app = await NestFactory.createApplicationContext(AppModule);
   const paserService = app
     .select(ParserModule)

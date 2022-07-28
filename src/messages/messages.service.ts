@@ -7,8 +7,8 @@ export class MessagesService {
     const messageFactory = new MessagesFactory();
 
     const message = messageFactory.create(messageType);
-    const result = await message.parseMessage(messageBody);
+    const parsedMessage = await message.parseMessage(messageBody);
 
-    return result;
+    return parsedMessage;
   }
 }
