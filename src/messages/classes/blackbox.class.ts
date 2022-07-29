@@ -40,6 +40,6 @@ export class BlackboxMessage extends Message {
   }
 
   generateMessageResponse(blackboxMessagesCount) {
-    return `#${this.responseType}#${blackboxMessagesCount}\\r\\n`;
+    return `#${this.responseType}#${blackboxMessagesCount}\r\n`;
   }
 }

@@ -57,8 +57,13 @@ export class ParserService {
     this.storageService.del(terminalRemoteAddress);
   }
 
+  checkMessageEnd(message: string) {
+    const validateReqExp = /.*\r\n/g;
+    return validateReqExp.test(message);
+  }
+
   private getMessageData(message: string) {
-    const validateReqExp = /^#(?<type>L|D|P|SD|B|M|I)#(?<message>.*)\\r\\n/g;
+    const validateReqExp = /^#(?<type>L|D|P|SD|B|M|I)#(?<message>.*)/g;
 
     let messageType: string, messageBody: string;
     try {
