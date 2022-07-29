@@ -21,4 +21,11 @@ services:
       - ${REDIS_PORT}:${REDIS_PORT}
     env_file:
       - .env
+  mongo:
+    container_name: wialon-parser-mongo
+    image: mongo:5
+    volumes:
+      - ./mongo-volume:/data/db
+    ports:
+      - 27017:27017
     
