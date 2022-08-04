@@ -58,19 +58,21 @@ export class ParserService {
   }
 
   checkMessageEnd(message: string) {
-    const validateReqExp = /.*\r\n/g;
+    const validateReqExp = /.*(\r\n|\n)/g;
     return validateReqExp.test(message);
   }
 
   private getMessageData(message: string) {
     const validateReqExp = /^#(?<type>L|D|P|SD|B|M|I)#(?<message>.*)/g;
-
+    console.log('message!!!!', message);
     let messageType: string, messageBody: string;
     try {
+	
       const validate = [...message.matchAll(validateReqExp)];
       messageType = validate[0]['groups']['type'];
       messageBody = validate[0]['groups']['message'];
     } catch (error) {
+console.log(error)
       throw new BadRequestException();
     }
 

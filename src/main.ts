@@ -15,7 +15,7 @@ async function bootstrap() {
     connection.setEncoding('utf-8');
     connection.setNoDelay(true);
     const remoteAddress = `${connection.remoteAddress}:${connection.remotePort}`;
-    let message: string;
+    let message: string = '';
 
     connection.on('data', (data: string) => {
       console.log('new data', data);
@@ -24,8 +24,10 @@ async function bootstrap() {
         console.log('check for the messages end');
       } else {
         console.log('requested full message! start parsing');
+	const fullmessage = `${message}${data}`;
+	message = '';
         new Promise<any>((resolve) => {
-          const res = paserService.parseMessage(message, remoteAddress);
+          const res = paserService.parseMessage(fullmessage, remoteAddress);
           resolve(res);
         })
           .then((res) => {
