@@ -5,7 +5,8 @@ const { combine, timestamp, printf } = format;
 
 @Injectable()
 export class FileLoggerService implements LoggerService {
-  logger: Logger;
+  combinedLogger: Logger;
+  errorLogger: Logger;
   constructor() {
     const myFormat = printf(({ level, message, data, timestamp }) => {
       return `${timestamp} ${level} [${message}]: ${
@@ -13,37 +14,44 @@ export class FileLoggerService implements LoggerService {
       }`;
     });
 
-    this.logger = createLogger({
-      levels: config.syslog.levels,
+    const loggerFormat = combine(timestamp(), myFormat);
+
+    this.combinedLogger = createLogger({
+      level: 'info',
+      format: loggerFormat,
+      transports: [
+        new transports.File({ filename: 'logs/info.log', level: 'info' }),
+      ],
+    });
+
+    this.errorLogger = createLogger({
       level: 'error',
-      format: combine(timestamp(), myFormat),
-      defaultMeta: { service: 'wialon-parser-service' },
+      format: loggerFormat,
       transports: [
         new transports.File({
           filename: 'logs/error.log',
           level: 'error',
         }),
-        new transports.File({ filename: 'logs/info.log', level: 'info' }),
       ],
     });
   }
 
   log(message: any, ...optionalParams: any[]) {
-    this.logger.info({
+    this.combinedLogger.info({
       message: message,
       data: optionalParams,
     });
   }
 
   error(message: any, ...optionalParams: any[]) {
-    this.logger.error({
+    this.errorLogger.error({
       message: message,
       data: optionalParams,
     });
   }
 
   warn(message: any, ...optionalParams: any[]) {
-    this.logger.warn({
+    this.combinedLogger.warn({
       message: message,
       data: optionalParams,
     });

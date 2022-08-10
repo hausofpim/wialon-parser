@@ -83,7 +83,9 @@ async function bootstrap() {
 }
 
 async function createStandaloneServices() {
-  const app = await NestFactory.createApplicationContext(AppModule);
+  const app = await NestFactory.createApplicationContext(AppModule, {
+    logger: new FileLoggerService(),
+  });
 
   const paserService = app
     .select(ParserModule)
