@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { TerminalCodes } from 'src/enums/terminal-codes.enum';
+import { FileLoggerService } from 'src/file-logger/file-logger.service';
 import { BadRequestException } from 'src/http-exceptions/errors-for-terminal/bad-request.error';
 import { MessagesService } from 'src/messages/messages.service';
 import { PointsModel } from 'src/points/points.model';
@@ -13,6 +14,7 @@ export class ParserService {
   constructor(
     private readonly messagesService: MessagesService,
     private readonly storageService: StorageService,
+    private readonly fileLoggerService: FileLoggerService,
     @InjectModel('points')
     private readonly pointsModel: Model<PointsModel>,
     @InjectModel('terminals')
@@ -64,15 +66,14 @@ export class ParserService {
 
   private getMessageData(message: string) {
     const validateReqExp = /^#(?<type>L|D|P|SD|B|M|I)#(?<message>.*)/g;
-    console.log('message!!!!', message);
+
     let messageType: string, messageBody: string;
     try {
-	
       const validate = [...message.matchAll(validateReqExp)];
       messageType = validate[0]['groups']['type'];
       messageBody = validate[0]['groups']['message'];
     } catch (error) {
-console.log(error)
+      this.fileLoggerService.error('Message validate error', error);
       throw new BadRequestException();
     }
 

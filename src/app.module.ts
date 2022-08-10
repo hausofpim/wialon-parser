@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { getMongoDbConfig } from './config/mongo.config';
 import { ParserModule } from './parser/parser.module';
 import { StorageModule } from './storage/storage.module';
+import { FileLoggerModule } from './file-logger/file-logger.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { StorageModule } from './storage/storage.module';
       inject: [ConfigService],
       useFactory: getMongoDbConfig,
     }),
+    FileLoggerModule,
   ],
   controllers: [AppController],
   providers: [AppService],

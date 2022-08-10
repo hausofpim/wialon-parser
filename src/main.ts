@@ -2,30 +2,37 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { FileLoggerModule } from './file-logger/file-logger.module';
+import { FileLoggerService } from './file-logger/file-logger.service';
 import { CustomHttpException } from './http-exceptions/custom-http.exception';
 import { ParserModule } from './parser/parser.module';
 import { ParserService } from './parser/parser.service';
 const net = require('net');
 
 async function bootstrap() {
-  const { paserService, configService } = await createStandaloneServices();
+  const { paserService, configService, fileLoggerService } =
+    await createStandaloneServices();
 
   const tcpServer = net.createServer();
   tcpServer.on('connection', (connection) => {
     connection.setEncoding('utf-8');
     connection.setNoDelay(true);
     const remoteAddress = `${connection.remoteAddress}:${connection.remotePort}`;
-    let message: string = '';
+    let message = '';
 
     connection.on('data', (data: string) => {
-      console.log('new data', data);
       if (!paserService.checkMessageEnd(data)) {
         message = `${message}${data}`;
-        console.log('check for the messages end');
+        fileLoggerService.log(
+          'Requested message`s part, check for the messages end',
+        );
       } else {
-        console.log('requested full message! start parsing');
-	const fullmessage = `${message}${data}`;
-	message = '';
+        const fullmessage = `${message}${data}`;
+        message = '';
+        fileLoggerService.log(
+          'Requested full message, start parsing',
+          fullmessage,
+        );
         new Promise<any>((resolve) => {
           const res = paserService.parseMessage(fullmessage, remoteAddress);
           resolve(res);
@@ -35,17 +42,21 @@ async function bootstrap() {
           })
           .catch((error) => {
             if (error instanceof CustomHttpException) {
-              console.log(error, data);
               const errorData = error.getResponse();
-              console.log(
-                `CustomHttpException:: Parsing message error:`,
+              fileLoggerService.error(
+                `CustomHttpException:: Parsing message error`,
                 errorData,
+                error,
+                data,
               );
               connection.write(
                 `#${errorData.messageType}#${errorData.errorNumber}\r\n`,
               );
             } else {
-              console.log(`Parsing message error:`, error);
+              fileLoggerService.error(
+                `Internal:: Parsing message error`,
+                error,
+              );
               connection.write(`##-1\r\n`);
             }
           });
@@ -54,25 +65,26 @@ async function bootstrap() {
 
     connection.once('close', () => {
       paserService.deleteFromStorage(remoteAddress);
-      console.log('connection close');
+      fileLoggerService.log('Connection close', remoteAddress);
     });
 
     connection.on('error', (error) => {
-      console.log('connection error', error);
+      fileLoggerService.log('Connection error', error);
     });
 
-    console.log('new client connection from %s', remoteAddress);
+    fileLoggerService.log('New client connection', remoteAddress);
   });
 
   const tcpServerPort = configService.get('TCP_PORT');
   const tcpServerHost = configService.get('TCP_HOST');
   tcpServer.listen(tcpServerPort, tcpServerHost, function () {
-    console.log('server listening to %j', tcpServer.address());
+    fileLoggerService.log('Server listening', tcpServer.address());
   });
 }
 
 async function createStandaloneServices() {
   const app = await NestFactory.createApplicationContext(AppModule);
+
   const paserService = app
     .select(ParserModule)
     .get(ParserService, { strict: true });
@@ -81,7 +93,11 @@ async function createStandaloneServices() {
     .select(ConfigModule)
     .get(ConfigService, { strict: true });
 
-  return { paserService, configService };
+  const fileLoggerService = app
+    .select(FileLoggerModule)
+    .get(FileLoggerService, { strict: true });
+
+  return { paserService, configService, fileLoggerService };
 }
 
 bootstrap();

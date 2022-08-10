@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { PointsSchema } from 'src/points/points.model';
 import { MongooseModule } from '@nestjs/mongoose';
 import { TerminalsSchema } from 'src/terminals/terminals.model';
+import { FileLoggerService } from 'src/file-logger/file-logger.service';
 
 @Module({
   imports: [
@@ -16,6 +17,11 @@ import { TerminalsSchema } from 'src/terminals/terminals.model';
     ConfigModule,
   ],
   controllers: [],
-  providers: [ParserService, MessagesService, StorageService],
+  providers: [
+    ParserService,
+    MessagesService,
+    StorageService,
+    FileLoggerService,
+  ],
 })
 export class ParserModule {}
