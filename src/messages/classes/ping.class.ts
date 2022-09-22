@@ -15,6 +15,6 @@ export class PingMessage extends Message {
   }
 
   generateMessageResponse() {
-    return `#${this.responseType}#\\r\\n`;
+    return `#${this.responseType}#\r\n`;
   }
 }

@@ -3,7 +3,9 @@ import { SchemaTypes, Types, Document } from 'mongoose';
 
 export type PointsDocument = PointsModel & Document;
 
-@Schema()
+@Schema({
+  timestamps: true,
+})
 export class PointsModel {
   @Prop()
   date: string;

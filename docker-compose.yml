@@ -21,4 +21,20 @@ services:
       - ${REDIS_PORT}:${REDIS_PORT}
     env_file:
       - .env
+  mongo:
+    container_name: wialon-parser-mongo
+    image: mongo:5
+    volumes:
+      - ./mongo-volume:/data/db
+      - ./mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh
+    ports:
+      - ${MONGO_PORT}:${MONGO_PORT}
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=${MONGO_DB}
+      - MONGO_INITDB_USERNAME=${MONGO_USERNAME}
+      - MONGO_INITDB_PASSWORD=${MONGO_PASSWORD}
+    env_file:
+      - .env
     

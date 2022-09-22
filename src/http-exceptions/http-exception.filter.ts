@@ -13,6 +13,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     response
       .status(status)
-      .send(`#${errorObject.messageType}#${errorObject.errorNumber}\\r\\n`);
+      .send(`#${errorObject.messageType}#${errorObject.errorNumber}\r\n`);
   }
 }

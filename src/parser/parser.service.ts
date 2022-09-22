@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { TerminalCodes } from 'src/enums/terminal-codes.enum';
@@ -10,6 +10,7 @@ import { TerminalsModel } from 'src/terminals/terminals.model';
 
 @Injectable()
 export class ParserService {
+  private readonly logger = new Logger();
   constructor(
     private readonly messagesService: MessagesService,
     private readonly storageService: StorageService,
@@ -57,8 +58,13 @@ export class ParserService {
     this.storageService.del(terminalRemoteAddress);
   }
 
+  checkMessageEnd(message: string) {
+    const validateReqExp = /.*(\r\n|\n)/g;
+    return validateReqExp.test(message);
+  }
+
   private getMessageData(message: string) {
-    const validateReqExp = /^#(?<type>L|D|P|SD|B|M|I)#(?<message>.*)\\r\\n/g;
+    const validateReqExp = /^#(?<type>L|D|P|SD|B|M|I)#(?<message>.*)/g;
 
     let messageType: string, messageBody: string;
     try {
@@ -66,6 +72,7 @@ export class ParserService {
       messageType = validate[0]['groups']['type'];
       messageBody = validate[0]['groups']['message'];
     } catch (error) {
+      this.logger.error('Message validate error', error);
       throw new BadRequestException();
     }
 

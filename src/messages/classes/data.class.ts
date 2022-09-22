@@ -74,6 +74,6 @@ export class DataMessage extends Message {
   }
 
   generateMessageResponse() {
-    return `#${this.responseType}#1\\r\\n`;
+    return `#${this.responseType}#1\r\n`;
   }
 }
